@@ -95,6 +95,24 @@ namespace NetCore.Controllers
                 }
             }
 
+            // multi query
+            IEnumerable<IEnumerable<string>> countryQueryWithMulti =
+                from country in countries
+                group country by country.population into groupedCountry
+                select (
+                    from tmpGroupedCountry in groupedCountry
+                    select tmpGroupedCountry.name
+                );
+
+            foreach (var countryQuery in countryQueryWithMulti)
+            {
+                Console.WriteLine(countryQuery);
+                foreach (var item in countryQuery)
+                {
+                    Console.WriteLine(item);
+                }
+            }
+
             return Ok(resultString);
         }
     }
