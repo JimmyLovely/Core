@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 
 // LINQ
 using System.Linq;
+using System.Xml.Linq;
 using System.Collections.Generic;
 
+// Project
 using NetCore.Models;
 
 namespace NetCore.Controllers
@@ -49,7 +51,7 @@ namespace NetCore.Controllers
                 new Country(){name="f", population=1004}
             };
 
-            //  group
+            // group
             IEnumerable<IGrouping<int, Country>> countryQueryWithGroup =
                 from country in countries
                 group country by country.population;
@@ -64,7 +66,7 @@ namespace NetCore.Controllers
                 }
             }
 
-            //  select
+            // select
             IEnumerable<TmpCountry> countryQueryWithSelect =
                 from country in countries
                 select new TmpCountry
@@ -181,26 +183,6 @@ namespace NetCore.Controllers
                 Console.WriteLine(productInfo);
             }
 
-            // join, inner group join
-            IEnumerable<Object> productInfoQueryWithGroup =
-                from category in categories
-                join product in products
-                on category.id
-                equals product.categoryId
-                into categoryProducts
-                from categoryProduct in categoryProducts
-                select new
-                {
-                    productId = categoryProduct.id,
-                    category = category.name,
-                    productName = categoryProduct.name
-                };
-
-            foreach (var productInfoWithGroup in productInfoQueryWithGroup)
-            {
-                Console.WriteLine(productInfoWithGroup);
-            }
-
             // join, equals for multi properties
             IEnumerable<Object> productInMultifoQuery =
                 from category in categories
@@ -260,6 +242,152 @@ namespace NetCore.Controllers
             foreach (var productInMultifo3 in productInMultifo3Query)
             {
                 Console.WriteLine(productInMultifo3);
+            }
+
+            // group join
+            Category[] categoriesForGroup = new Category[] {
+                new Category() {id=1, price=10, name="Book"},
+                new Category() {id=2, price=20, name="WebUrl"},
+                new Category() {id=3, price=30, name="Phone"},
+                new Category() {id=4, price=40, name="Food"},
+                new Category() {id=5, price=50, name="Not matched category"},
+            };
+
+            Product[] productsForGroup = new Product[] {
+                new Product() {id = 1, price= 10, categoryId = 1, name = ".Net"},
+                new Product() {id = 2, price= 10, categoryId = 1, name = "Java"},
+                new Product() {id = 3, price= 12, categoryId = 1, name = "JavaScript"},
+                new Product() {id = 4, price= 12, categoryId = 1, name = "MongoDB"},
+                new Product() {id = 5, price= 20, categoryId = 2, name = "https://github.com/JimmyLovely/Angular"},
+                new Product() {id = 6, price= 20, categoryId = 2, name = "https://github.com/JimmyLovely/Book"},
+                new Product() {id = 7, price= 12, categoryId = 2, name = "https://github.com/JimmyLovely/Note"},
+                new Product() {id = 8, price= 12, categoryId = 2, name = "https://github.com/JimmyLovely/Core"},
+                new Product() {id = 9, price= 30, categoryId = 3, name = "Lumia 950 XL"},
+                new Product() {id = 10, price= 30, categoryId = 3, name = "Lumia 950"},
+                new Product() {id = 11, price= 12, categoryId = 3, name = "Lumia 1020"},
+                new Product() {id = 12, price= 12, categoryId = 3, name = "Surface Duo"},
+                new Product() {id = 13, price= 40, categoryId = 4, name = "Egg"},
+                new Product() {id = 14, price= 40, categoryId = 4, name = "Tomato"},
+                new Product() {id = 15, price= 12, categoryId = 4, name = "Hot Dog"},
+                new Product() {id = 16, price= 12, categoryId = 4, name = "Hamburger"},
+                new Product() {id = 17, price= 40, categoryId = 11, name = "Other"},
+                new Product() {id = 18, price= 12, categoryId = 11, name = "Other 2"}
+            };
+
+            Product2[] products2ForGroup = new Product2[] {
+                new Product2() {id = 1, price= 10, category = categoriesForGroup[0], name = ".Net 2"},
+                new Product2() {id = 2, price= 10, category = categoriesForGroup[0], name = "Java 2"},
+                new Product2() {id = 3, price= 12, category = categoriesForGroup[0], name = "JavaScript 2"},
+                new Product2() {id = 4, price= 12, category = categoriesForGroup[0], name = "MongoDB 2"},
+                new Product2() {id = 5, price= 20, category = categoriesForGroup[1], name = "https://github.com/JimmyLovely/Angular 2"},
+                new Product2() {id = 6, price= 20, category = categoriesForGroup[1], name = "https://github.com/JimmyLovely/Book 2"},
+                new Product2() {id = 7, price= 12, category = categoriesForGroup[1], name = "https://github.com/JimmyLovely/Note 2"},
+                new Product2() {id = 8, price= 12, category = categoriesForGroup[1], name = "https://github.com/JimmyLovely/Core 2"},
+                new Product2() {id = 9, price= 30, category = categoriesForGroup[2], name = "Lumia 950 XL 2"},
+                new Product2() {id = 10, price= 30, category = categoriesForGroup[2], name = "Lumia 950 2"},
+                new Product2() {id = 11, price= 12, category = categoriesForGroup[2], name = "Lumia 1020 2"},
+                new Product2() {id = 12, price= 12, category = categoriesForGroup[2], name = "Surface Duo 2"},
+                new Product2() {id = 13, price= 40, category = categoriesForGroup[3], name = "Egg 2"},
+                new Product2() {id = 14, price= 40, category = categoriesForGroup[3], name = "Tomato 2"},
+                new Product2() {id = 15, price= 12, category = categoriesForGroup[3], name = "Hot Dog 2"},
+                new Product2() {id = 16, price= 12, category = categoriesForGroup[3], name = "Hamburger 2"},
+                new Product2() {id = 17, price= 40, category = {id=11, price=40, name="Food"}, name = "Other"},
+                new Product2() {id = 18, price= 12, category = {id=11, price=40, name="Food"}, name = "Other 2"}
+            };
+
+            // inner join without group join
+            IEnumerable<Object> productInfoQueryWithoutGroup =
+                from category in categoriesForGroup
+                join product in productsForGroup
+                on category.id
+                equals product.categoryId
+                select new {
+                    categroyId = category.id,
+                    catergoryName = category.name,
+                    productId = product.id,
+                    productName = product.name
+                };
+
+            foreach (var productInfo in productInfoQueryWithoutGroup)
+            {
+                Console.WriteLine(productInfo);
+            }
+
+            // inner join without group join
+            IEnumerable<Object> productInfoQueryWithGroup =
+                from category in categoriesForGroup
+                join product in productsForGroup
+                on category.id
+                equals product.categoryId
+                into categoryProductGroup
+                from categoryProduct in categoryProductGroup
+                select new {
+                    categroyId = category.id,
+                    catergoryName = category.name,
+                    productId = categoryProduct.id,
+                    productName = categoryProduct.name
+                };
+
+            foreach (var productInfo in productInfoQueryWithGroup)
+            {
+                Console.WriteLine(productInfo);
+            }
+
+            // group join
+            IEnumerable<GroupJoinResult> productInfoQueryWithGroup2 =
+                from category in categoriesForGroup
+                join product in productsForGroup
+                on category.id
+                equals product.categoryId
+                into categoryProductGroup
+                select new GroupJoinResult
+                {
+                    categroyId = category.id,
+                    catergoryName = category.name,
+                    categoryProductGroup = categoryProductGroup
+                };
+
+            foreach (var productInfo in productInfoQueryWithGroup2)
+            {
+                Console.WriteLine(productInfo);
+            }
+
+            // group join with XML
+            XElement productInfoQueryWithGroupXML = new XElement("Root",
+                from category in categoriesForGroup
+                join product in productsForGroup
+                on category.id
+                equals product.categoryId
+                into categoryProductGroup
+                select new XElement("Category",
+                    new XAttribute("CategroyId", category.id),
+                    new XAttribute("CategroyName", category.name),
+                    from categoryProduct in categoryProductGroup
+                    select new XElement("CategoryProduct",
+                        new XElement("ProductId", categoryProduct.id),
+                        new XElement("ProductName", categoryProduct.name)))
+            );
+
+            Console.WriteLine(productInfoQueryWithGroupXML);
+
+            // left join with group join
+            IEnumerable<Object> productInfoQueryWithGroupWithLeftJoin =
+                from category in categoriesForGroup
+                join product in productsForGroup
+                on category.id
+                equals product.categoryId
+                into categoryProductGroup
+                from categoryProduct in categoryProductGroup.DefaultIfEmpty(new Product{id= -1, name = string.Empty})
+                select new {
+                    categroyId = category.id,
+                    catergoryName = category.name,
+                    productId = categoryProduct,
+                    productName = categoryProduct?.name
+                };
+
+            foreach (var productInfo in productInfoQueryWithGroupWithLeftJoin)
+            {
+                Console.WriteLine(productInfo);
             }
 
             return Ok(resultString);
