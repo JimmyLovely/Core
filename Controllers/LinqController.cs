@@ -370,6 +370,26 @@ namespace NetCore.Controllers
 
             Console.WriteLine(productInfoQueryWithGroupXML);
 
+            // left join with group join
+            IEnumerable<Object> productInfoQueryWithGroupWithLeftJoin =
+                from category in categoriesForGroup
+                join product in productsForGroup
+                on category.id
+                equals product.categoryId
+                into categoryProductGroup
+                from categoryProduct in categoryProductGroup.DefaultIfEmpty(new Product{id= -1, name = string.Empty})
+                select new {
+                    categroyId = category.id,
+                    catergoryName = category.name,
+                    productId = categoryProduct,
+                    productName = categoryProduct?.name
+                };
+
+            foreach (var productInfo in productInfoQueryWithGroupWithLeftJoin)
+            {
+                Console.WriteLine(productInfo);
+            }
+
             return Ok(resultString);
         }
     }
