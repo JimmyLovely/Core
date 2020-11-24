@@ -420,6 +420,17 @@ namespace NetCore.Controllers
                 Console.WriteLine(score);
             }
 
+            // store query result in memory
+            IEnumerable<int> scoreListQueryWithResult =
+                from score in scoreList
+                select score;
+
+            int[] scoreIntArray= scoreListQueryWithResult.ToArray();
+            var scoreIntArrayWithT = scoreListQueryWithResult.ToArray<int>();
+
+            List<int> scoreIntList = scoreListQueryWithResult.ToList();
+            var scoreIntListWithT = scoreListQueryWithResult.ToList<int>();
+
             return Ok(resultString);
         }
     }
