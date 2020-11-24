@@ -390,6 +390,36 @@ namespace NetCore.Controllers
                 Console.WriteLine(productInfo);
             }
 
+
+            // concat query
+            List<int> scoreList = new List<int> { 1, 2, 3, 4, 5, 7, 8 };
+
+            IEnumerable<int> scoreListQuery =
+                from score in scoreList
+                select score;
+
+            IEnumerable<int> scoreListQueryWithOrderBy =
+                from score in scoreListQuery
+                where score % 2 == 0
+                select score;
+
+            foreach (int score in scoreListQueryWithOrderBy)
+            {
+                Console.WriteLine(score);
+            }
+
+            var scoreListQuery2 =
+                from score2 in
+                    (from score in scoreList
+                     select score)
+                where score2 % 2 == 0
+                select score2;
+
+            foreach (int score in scoreListQueryWithOrderBy)
+            {
+                Console.WriteLine(score);
+            }
+
             return Ok(resultString);
         }
     }
