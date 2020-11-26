@@ -29,7 +29,7 @@ namespace NetCore.Controllers
             string resultString = string.Empty;
             foreach (var item in scoreQuery)
             {
-                resultString += item;
+                Console.WriteLine(item);
             }
 
             Console.WriteLine(scoreQuery.Count());
@@ -38,9 +38,12 @@ namespace NetCore.Controllers
             Console.WriteLine(scoreQuery.Max());
             Console.WriteLine(scoreQuery.Min());
 
+            // lambda
+            IEnumerable<int> scroresLambda = scores.Where(x => x > 3).Select(x => x + 2);
+
             // query syntax
             Country[] countries = new Country[]{
-                new Country() {name="a", population =100},
+                new Country(){name="a", population=100},
                 new Country(){name="b", population=1000},
                 new Country(){name="c", population=100},
                 new Country(){name="d", population=1000},
@@ -66,6 +69,9 @@ namespace NetCore.Controllers
                 }
             }
 
+            // lambda
+            IEnumerable<IGrouping<int, Country>> countryLambdaWithGroup = countries.GroupBy(x => x.population);
+
             // select
             IEnumerable<TmpCountry> countryQueryWithSelect =
                 from country in countries
@@ -74,11 +80,15 @@ namespace NetCore.Controllers
                     TmpName = country.name,
                     TmpPopulation = country.population
                 };
+
             Console.WriteLine("select");
             foreach (var item in countryQueryWithSelect)
             {
                 Console.WriteLine(item.TmpName + item.TmpPopulation);
             }
+
+            // lambda
+            IEnumerable<TmpCountry> countryLambdaWithSelect = countries.Select(x => new TmpCountry {TmpName = x.name, TmpPopulation = x.population});
 
             // into
             IEnumerable<IGrouping<int, Country>> countryQueryWithInto =
@@ -97,6 +107,9 @@ namespace NetCore.Controllers
                 }
             }
 
+            // lambda
+            IEnumerable<IGrouping<int, Country>> countryLambdaWithInto = countries.GroupBy(x => x.population).OrderByDescending(x => x.Key).Select(x => x);
+
             // multi query
             IEnumerable<IEnumerable<string>> countryQueryWithMulti =
                 from country in countries
@@ -114,6 +127,31 @@ namespace NetCore.Controllers
                     Console.WriteLine(item);
                 }
             }
+
+            // lambda
+            var countryLambdaWithMulti = countries.GroupBy(x => x.population, x => x.name);
+
+            // better
+            var countryLambdaWithMulti1 = countries.GroupBy(x => x.population).Select(x => x.Select(x => x.name));
+
+            // multi query with select
+            IEnumerable<string> countryQueryWithMultiWithSelect =
+                from country in countries
+                group country by country.population into groupedCountry
+                from tmpGroupedCountry in groupedCountry
+                select tmpGroupedCountry.name;
+
+            foreach (var countryQuery in countryQueryWithMultiWithSelect)
+            {
+                Console.WriteLine(countryQuery);
+            }
+
+            // lambda
+            var countryLambdaWithMultiWithSelect  = countries.GroupBy(x => x.population, x => x.name).SelectMany(x => x);
+            var countryLambdaWithMultiWithSelect2 = countries.GroupBy(x => x.population).SelectMany(x => x.Select(x => x.name));
+
+            // better
+            var countryLambdaWithMultiWithSelect3 = countries.GroupBy(x => x.population).SelectMany(x => x, (x, y) => y.name);
 
             // join
             Category[] categories = new Category[] {
@@ -183,6 +221,9 @@ namespace NetCore.Controllers
                 Console.WriteLine(productInfo);
             }
 
+            // lambda
+            var productInfoLambda = categories.Join(products, c => c.id, p => p.categoryId, (c, p) => new {productId = p.id, category = c.name, productName = p.name});
+
             // join, equals for multi properties
             IEnumerable<Object> productInMultifoQuery =
                 from category in categories
@@ -202,12 +243,20 @@ namespace NetCore.Controllers
                 Console.WriteLine(productInMultifo);
             }
 
+            // lambda
+            var productInMultifoLambda =
+                categories.Join(
+                products,
+                c => new {categoryId = c.id, price = c.price},
+                p => new { categoryId = p.categoryId, price = p.price },
+                (c, p) => new {productId = p.id, category = c.name, productName = p.name, price = c.price});
+
             // join, equals for object
             IEnumerable<Object> productInMultifo2Query =
                 from category in categories
                 join product in products2
                 on new { category = category, price = category.price }
-                equals new { product.category, price = product.price }
+                equals new { category = product.category, price = product.price }
                 select new
                 {
                     productId = product.id,
@@ -220,6 +269,14 @@ namespace NetCore.Controllers
             {
                 Console.WriteLine(productInMultifo2);
             }
+
+            // lambda
+            var productInMultifo2Lambda =
+                categories.Join(
+                products2,
+                c => new {category = c, price = c.price},
+                p => new {category = p.category, price = p.price },
+                (c, p) => new {productId = p.id, category = c.name, productName = p.name, price = c.price});
 
             // join, equals for Multi resources
             IEnumerable<Object> productInMultifo3Query =
@@ -243,6 +300,17 @@ namespace NetCore.Controllers
             {
                 Console.WriteLine(productInMultifo3);
             }
+
+            // lambda
+            var productInMultifo3Lambda = categories
+                .Join(products, c => c.id, p => p.categoryId, (c, p) => new {c, p})
+                .Join(products2, cp => cp.p.categoryId, p2 => p2.category.id, (cp, p2) => new {
+                    productId = cp.p.id,
+                    category = cp.c.name,
+                    productName = cp.p.name,
+                    product2Id = p2.id,
+                    product2Nmae = p2.name
+                });
 
             // group join
             Category[] categoriesForGroup = new Category[] {
@@ -313,6 +381,14 @@ namespace NetCore.Controllers
                 Console.WriteLine(productInfo);
             }
 
+            // lambda
+            var productInfoLambdaWithoutGroup = categoriesForGroup.Join(productsForGroup, c => c.id, p => p.categoryId, (c, p) => new{
+                    categroyId = c.id,
+                    catergoryName = c.name,
+                    productId = p.id,
+                    productName = p.name
+            });
+
             // inner join without group join
             IEnumerable<Object> productInfoQueryWithGroup =
                 from category in categoriesForGroup
@@ -333,6 +409,16 @@ namespace NetCore.Controllers
                 Console.WriteLine(productInfo);
             }
 
+            // lambda
+            var productInfoLambdaWithGroup = categoriesForGroup.Join(productsForGroup, c => c.id, p => p.categoryId, (c, p) => new{
+                c,p
+            }).Select(cp => new {
+                    categroyId = cp.c.id,
+                    catergoryName = cp.c.name,
+                    productId = cp.p.id,
+                    productName = cp.p.id
+            });
+
             // group join
             IEnumerable<GroupJoinResult> productInfoQueryWithGroup2 =
                 from category in categoriesForGroup
@@ -351,6 +437,15 @@ namespace NetCore.Controllers
             {
                 Console.WriteLine(productInfo);
             }
+
+            // lambda
+            var productInfoLambdaWithGroup2 = categoriesForGroup.GroupJoin(productsForGroup, c => c.id, p => p.categoryId, (c, p) => new{
+                c,p
+            }).Select(cp => new {
+                    categroyId = cp.c.id,
+                    catergoryName = cp.c.name,
+                    categoryProductGroup = cp.p,
+            });
 
             // group join with XML
             XElement productInfoQueryWithGroupXML = new XElement("Root",
@@ -390,6 +485,15 @@ namespace NetCore.Controllers
                 Console.WriteLine(productInfo);
             }
 
+            // lambda
+            var productInfoLambdaWithGroupWithLeftJoin = categoriesForGroup.GroupJoin(productsForGroup, c => c.id, p => p.categoryId, (c, p) => new{
+                c,p
+            }).SelectMany(cp => cp.p.DefaultIfEmpty(), (cp_c, cpps) => new {
+                categroyId = cp_c.c.id,
+                catergoryName = cp_c.c.name,
+                productId = cpps,
+                productName = cpps?.name
+            });
 
             // concat query
             List<int> scoreList = new List<int> { 1, 2, 3, 4, 5, 7, 8 };
@@ -402,6 +506,7 @@ namespace NetCore.Controllers
                 from score in scoreListQuery
                 where score % 2 == 0
                 select score;
+
 
             foreach (int score in scoreListQueryWithOrderBy)
             {
@@ -420,6 +525,9 @@ namespace NetCore.Controllers
                 Console.WriteLine(score);
             }
 
+            // lambda
+            var scoreListLambda = scoreList.Select(x => x).Where(x => x % 2 == 0);
+
             // store query result in memory
             IEnumerable<int> scoreListQueryWithResult =
                 from score in scoreList
@@ -430,6 +538,10 @@ namespace NetCore.Controllers
 
             List<int> scoreIntList = scoreListQueryWithResult.ToList();
             var scoreIntListWithT = scoreListQueryWithResult.ToList<int>();
+
+            // lambda
+            var scoreListLambdaWithResultToArray = scoreList.Select(x => x).ToArray();
+            var scoreListLambdaWithResultToList  = scoreList.Select(x => x).ToList();
 
             // group
             List<Student> students = new List<Student>
@@ -463,6 +575,9 @@ namespace NetCore.Controllers
                 }
             }
 
+            // lambda
+            var studentsGroupBasicLambda = students.GroupBy(x => x.LastName);
+
             // projection group
             IEnumerable<IGrouping<Char, Object>> studentsGroupProjection =
                 from student in students
@@ -476,6 +591,9 @@ namespace NetCore.Controllers
                     Console.WriteLine(student);
                 }
             }
+
+            // lambda
+            var studentsGroupProjectionLambda = students.GroupBy(x => x.LastName[0], x => new {x.FirstName, x.LastName});
 
             // calculate group
             IEnumerable<IGrouping<int, Object>> studentsGroupCalculate =
@@ -491,6 +609,9 @@ namespace NetCore.Controllers
                     Console.WriteLine(student);
                 }
             }
+
+            // lambda
+            var studentsGroupCalculateLambda = students.GroupBy(x => x.ExamScores.Average() > 0 ? (int)x.ExamScores.Average() /10 : 0, x => new {x.FirstName, x.LastName});
 
             // multi-calculate group
             IEnumerable<IGrouping<Object, Object>> studentsGroupMulti =
@@ -510,6 +631,9 @@ namespace NetCore.Controllers
                     Console.WriteLine(student);
                 }
             }
+
+            // lambda
+            var studentsGroupMultiLambda = students.GroupBy(x => new {lastNameLetter = x.LastName[0], IsPass = x.ExamScores.Average() > 80}, x => new {x.FirstName, x.LastName});
 
             return Ok(resultString);
         }
