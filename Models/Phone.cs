@@ -1,8 +1,3 @@
-
-using System;
-using Microsoft.AspNetCore.Mvc;
-
-
 namespace NetCore.Models
 {
     public class Phone
@@ -10,7 +5,6 @@ namespace NetCore.Models
         public Phone()
         {
         }
-
 
         public string Read(string name)
         {

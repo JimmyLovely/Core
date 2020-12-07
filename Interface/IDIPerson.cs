@@ -1,4 +1,3 @@
-
 namespace NetCore.Interface
 {
     public interface IDIPerson
