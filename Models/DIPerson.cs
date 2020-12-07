@@ -1,7 +1,3 @@
-using System;
-using Microsoft.AspNetCore.Mvc;
-
-using NetCore.Models;
 using NetCore.Interface;
 
 namespace NetCore.Models
@@ -9,7 +5,6 @@ namespace NetCore.Models
 
     public class DIPerson : IDIPerson
     {
-
         private IDIPhone dIPhone;
 
         public DIPerson(IDIPhone diPhone)
@@ -21,8 +16,6 @@ namespace NetCore.Models
 
         public int age;
         public string name;
-
-
 
 
         public string Read()

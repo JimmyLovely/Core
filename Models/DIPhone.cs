@@ -1,7 +1,3 @@
-
-using System;
-using Microsoft.AspNetCore.Mvc;
-
 using NetCore.Interface;
 
 namespace NetCore.Models
@@ -11,7 +7,6 @@ namespace NetCore.Models
         public DIPhone()
         {
         }
-
 
         public string Read(string name)
         {

@@ -1,8 +1,3 @@
-using System;
-using Microsoft.AspNetCore.Mvc;
-
-using NetCore.Models;
-
 namespace NetCore.Models
 {
 
