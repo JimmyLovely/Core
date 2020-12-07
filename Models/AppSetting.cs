@@ -6,6 +6,5 @@ namespace NetCore.Models
     {
         public AppSetting Value => this;
         public Logging logging { get; set; }
-
     }
 }
